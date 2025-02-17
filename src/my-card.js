@@ -14,6 +14,7 @@ export class MyCard extends LitElement {
 
   static get properties() {
     return {
+      fancy: { type: Boolean, reflect: true },
       title: { type: String },
       image: { type: String },
       fact: { type: String },
@@ -23,27 +24,47 @@ export class MyCard extends LitElement {
 
   constructor() {
     super();
-    this.title = "Saquon Barkley";
-    this.image = "https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/3929630.png&w=350&h=254";
-    this.fact = "#1 running back for the Philadelphia Eagles";
-    this.detailLink = "https://hax.psu.edu";
+    this.title = "My card";
+    this.image = "";
+    this.fact = "";
+    this.detailLink = "https://hax.psu.edu"; 
+    this.fancy = false;
   }
 
   static get styles() {
     return css`
       :host {
-        display: block;
+        display: inline-block;
         width: 300px;
-        padding: 8px;
+        height: 500px;
+        padding: 16px;
         margin: 8px;
         text-align: center;
         background-color: grey;
         border: 4px solid darkgreen;
+        box-sizing: border-box;
+      }
+
+      .saquon {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      :host([fancy]) .card {
+        background-color: lightgreen;
+        border: 4px solid darkgreen;
+        box-shadow: 10px 5px 5px darkgreen;
+      }
+
+      :host([fancy]) {
+        background-color: lightgreen;
       }
 
       .card-image {
         width: 100%;
         height: 230px;
+        object-fit: cover;
         border-radius: 8px;
         margin-bottom: 16px;
       }
@@ -58,32 +79,44 @@ export class MyCard extends LitElement {
         margin-bottom: 16px;
         text-align: center;
         font-size: 16px;
+        flex-grow: 1;
       }
 
       .detailbutton {
         color: white;
         border-radius: 4px;
-        curspr: pointer;
+        cursor: pointer;
       }
-      @media (max-width: 500px) {
-        :host {
-          max-width: 90%;
-          padding: 12px;
-        }
-        
-        .card-image {
-          height: 200px;
-        }
-        
-        .card-title {
-          font-size: 1.5em;
-        }
-        
-        .fact {
-          font-size: 0.9em;
-        }
+
+  details summary {
+    text-align: left;
+    font-size: 20px;
+    padding: 8px 0;
+  }
+
+  details[open] summary {
+    font-weight: bold;
+  }
+  
+  details div {
+    border: 2px solid black;
+    text-align: left;
+    padding: 8px;
+    height: 70px;
+    overflow: auto;
   }
     `;
+  }
+
+  // put this anywhere on the MyCard class; just above render() is probably good
+  openChanged(e) {
+    console.log(e.newState);
+    if (e.newState === "open") {
+      this.fancy = true;
+    }
+    else {
+      this.fancy = false;
+    }
   }
 
   render() {
@@ -91,10 +124,18 @@ export class MyCard extends LitElement {
       <div class="saquon">
         <h1 class="card-title">${this.title}</h1>
           <img class="card-image" alt="${this.title}" src="${this.image}" />
-          <p class="fact">${this.fact}</p>
-          <a href="${this.detailLink}" class="detailbutton">Details</a>
-        </div>
-      `;
+          <p class="fact"><slot></slot></p>
+          <details ?open="${this.fancy}" @toggle="${this.openChanged}">
+          <summary>details</summary>
+          <div>
+            <slot></slot>
+            <a href="${this.detailLink}" target="_blank">
+              <button class="btn"><em>Link for more info</em></button>
+            </a>
+          </div>
+        </details>
+          
+        </div>`;
     }
   }
 
